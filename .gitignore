@@ -45,3 +45,7 @@ solis
 
 # debug information files
 *.dwo
+
+# Misc
+misc/logo.png
+misc/logo_small.png
