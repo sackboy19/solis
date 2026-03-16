@@ -61,16 +61,13 @@ struct Lexer {
 		return contents[current];
 	}
 
-	void ScanIdentifier();
-	void ScanTokens();
+	void ScanIdentifier() {
+
+	}
+
+	void ScanTokens() {
+		self->tokens.Push(Token{});
+	}
 };
-
-void Lexer::ScanIdentifier() {
-
-}
-
-void Lexer::ScanTokens() {
-	self->tokens.Push(Token{});
-}
 
 } // namespace sol
