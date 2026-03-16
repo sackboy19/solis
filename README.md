@@ -1,4 +1,5 @@
-![](https://github.com/sackboy19/solis/blob/main/misc/logo_small.png)
+<img width="142" height="131" alt="logo_small" src="https://github.com/user-attachments/assets/7157b5c7-ba27-4415-8ed0-9b630f88ed8e" />
+
 # Solis (Programming Language)
 
 WIP
