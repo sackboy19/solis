@@ -1,4 +1,4 @@
-![](https://github.com/sackboy19/solis/blob/main/misc/logo.png)
+![](https://github.com/sackboy19/solis/blob/main/misc/logo_small.png)
 # Solis (Programming Language)
 
 WIP
