@@ -1,11 +1,13 @@
 # KDevelop
 .kdev4/
 *.kdev4
+ideas.sol
 
 # Prerequisites
 *.d
 
 # Compiled Object files
+solis
 *.slo
 *.lo
 *.o
@@ -14,7 +16,6 @@
 # Precompiled Headers
 *.gch
 *.pch
-src/test.sol
 
 # Linker files
 *.ilk
