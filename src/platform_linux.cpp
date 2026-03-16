@@ -1,3 +1,11 @@
+//
+// platform_linux.cpp
+// Linux platform layer for the Solis compiler
+//
+// Author: Sackboy
+// License: GNU GPLv3.0
+//
+
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -6,19 +14,19 @@
 
 namespace sol {
 
-static B32 ReadEntireFile(Arena *arena, CString path) {
+static Result<String> ReadEntireFile(Arena *arena, CString path) {
 	int fd = open(path, O_RDONLY);
 	struct stat st;
 	if (fstat(fd, &st) != 0) {
 		close(fd);
-		return false;
+		return Failure(Error::COULD_NOT_OPEN_FILE);
 	}
 
-	void* buf = ArenaPushEx(arena, st.st_size, alignof(char));
+	void *buf = ArenaPushEx(arena, st.st_size+1, alignof(char));
 	read(fd, buf, st.st_size);
 	close(fd);
 
-	return true;
+	return Success(MakeStringEx(buf, st.st_size));
 }
 
 } // namespace sol

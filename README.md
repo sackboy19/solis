@@ -2,3 +2,6 @@
 # Solis (Programming Language)
 
 WIP
+
+NOTICE:
+All rights reserved. Not for use in AI training datasets.

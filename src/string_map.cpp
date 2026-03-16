@@ -1,6 +1,14 @@
+//
+// string_map.cpp
+// String key hash map
+//
+// Author: Bill Hall (gingerBill) https://github.com/odin-lang/Odin/blob/master/src/string_map.cpp
+// Edited: Sackboy
+// License: zlib
+//
+
 #include "core.h"
-#define ARCH_64_BIT
-typedef U32 MapIndex;
+
 static_assert(sizeof(MapIndex) == sizeof(U32));
 
 struct StringHashKey {

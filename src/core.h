@@ -1,3 +1,11 @@
+//
+// core.h
+// Core library
+//
+// Author: Sackboy
+// License: GNU GPLv3.0
+//
+
 #pragma once
 #define NOMINMAX
 #include <algorithm> // std::clamp, std::max, std::min
@@ -46,6 +54,7 @@
 #define ForEachMut(container) for (auto& v : container)
 
 #define null nullptr
+#define self this
 #define Unused(x) (void)(x);
 #ifdef _MSC_VER
 #define force_inline inline __forceinline
@@ -106,7 +115,9 @@ typedef uintptr_t UIntPtr;
 
 typedef float  F32;
 typedef double F64;
+
 typedef S32 B32;
+typedef bool B8;
 
 typedef const wchar_t *WString;
 typedef const char    *CString;
@@ -171,7 +182,7 @@ struct String {
 	}
 };
 #define MakeString(text) String{(char *)text, sizeof(text) - 1}
-#define MakeStringEx(str, count) String{str, (count)}
+#define MakeStringEx(str, count) String{(char *)(str), (U64)(count)}
 
 #define STR_FMT "%.*s"
 #define FmtStr(s) (S32)((s).count), (s).data
@@ -198,6 +209,44 @@ inline String StringFmt(View<char> buf, CString format, ...) {
 	va_end(args);
 	return MakeStringEx(buf.data, written);
 }
+
+// Errors
+enum class Error {
+	SUCCESS,
+	COULD_NOT_OPEN_FILE,
+};
+static CString ErrorToString(Error error) {
+	switch (error) {
+		case Error::SUCCESS:
+			return "Error::SUCCESS";
+		case Error::COULD_NOT_OPEN_FILE:
+			return "Error::COULD_NOT_OPEN_FILE";
+		default:
+			return "Error::UNKNOWN";
+	}
+}
+
+template <typename T>
+struct Result {
+	union {
+		T value;
+		Error error;
+	};
+	B8 success;
+};
+// You should only ever pass a variable to a Result here. Not a function call.
+#define Check(result_var, error_message) { \
+	if (!(result_var).success) { \
+		print(error_message ": %s", ErrorToString((result_var).error); \
+	} \
+}
+#define print_error(error_message, error) print(error_message ": %s", ErrorToString((error)))
+
+template <typename T>
+static force_inline Result<T> Success(T value) {
+	return {.value=value, .success=true};
+}
+#define Failure(err) {.error=(err), .success=false}
 
 // Colors
 typedef U32 Col32;
@@ -684,8 +733,8 @@ struct Array {
 		Type *first = ArenaPushNoZero(arena, Type);
 		arena->used -= sizeof(Type);
 
-		this->arena = arena;
-		this->data = first;
+		self->arena = arena;
+		self->data = first;
 		if (checkpoint) {
 			ArenaCheckpoint(arena);
 		}
@@ -778,8 +827,8 @@ struct HashMap {
 		Type *first = ArenaPushNoZero(arena, Type);
 		arena->used -= sizeof(Type);
 
-		this->arena = arena;
-		this->data = first;
+		self->arena = arena;
+		self->data = first;
 		if (checkpoint) {
 			ArenaCheckpoint(arena);
 		}

@@ -1,3 +1,12 @@
+//
+// pointer_map.cpp
+// Pointer key hash map
+//
+// Author: Bill Hall (gingerBill) https://github.com/odin-lang/Odin/blob/master/src/ptr_map.cpp
+// Edited: Sackboy
+// License: zlib
+//
+
 #include "core.h"
 
 template <typename T>
