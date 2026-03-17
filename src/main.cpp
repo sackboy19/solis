@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	String contents = result.value;
-	print("file contents: %.*s", FmtStr(contents));
+	// print("file contents: %.*s", FmtStr(contents));
 
 	U16 file_id = 0;
 
@@ -37,4 +37,7 @@ int main(int argc, char *argv[]) {
 	lexer.ScanTokens();
 
 	print("num tokens: %lu", lexer.tokens.count);
+	ForEach(lexer.tokens) {
+		lexer.PrintToken(v);
+	}
 }

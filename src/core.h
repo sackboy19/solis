@@ -763,6 +763,11 @@ struct Array {
 		DebugAssert(index < count, "Array index out of bounds.");
 		return data[index];
 	}
+
+	Type *begin() { return data; }
+	Type *end()   { return data + count; }
+	const Type *begin() const { return data; }
+	const Type *end()   const { return data + count; }
 };
 
 /* #endregion */
