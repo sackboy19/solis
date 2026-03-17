@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 
 	Result result = sol::ReadEntireFile(file_arena, test_file);
 	if (!result.success) {
-		print_error("Could not open file", result.error);
+		PrintError("Could not open file", result.error);
 	}
 
 	String contents = result.value;

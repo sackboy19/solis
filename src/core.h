@@ -77,8 +77,15 @@
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x
 
-#ifndef NDEBUG
-#define print(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
+#define ANSI_RED    "\x1b[31m"
+#define ANSI_GREEN  "\x1b[32m"
+#define ANSI_YELLOW "\x1b[33m"
+#define ANSI_RESET  "\x1b[0m"
+
+// #ifndef NDEBUG
+#define print(fmt, ...)     printf(fmt "\n", ##__VA_ARGS__)
+#define printwarn(fmt, ...) printf(ANSI_YELLOW fmt "\n" ANSI_RESET, ##__VA_ARGS__)
+#define printerr(fmt, ...) fprintf(stderr, ANSI_RED fmt "\n" ANSI_RESET, ##__VA_ARGS__)
 #if OS_WINDOWS
 #define DebugAssert(c, msg)       \
 	if (!(c)) {                      \
@@ -90,13 +97,12 @@
 		print("Assertion failed [" __FILE__ ":" STRINGIZE(__LINE__) "] \"" msg "\""); \
 		__builtin_trap(); \
 	}
-
 #endif
-#else
-// #define print(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
-#define print(fmt, ...)
-#define DebugAssert(c, msg)
-#endif
+// #else
+// #define print(fmt, ...)
+// #define printerr(fmt, ...)
+// #define DebugAssert(c, msg)
+// #endif
 
 // Types
 typedef uint8_t  U8;
@@ -240,7 +246,7 @@ struct Result {
 		print(error_message ": %s", ErrorToString((result_var).error); \
 	} \
 }
-#define print_error(error_message, error) print(error_message ": %s", ErrorToString((error)))
+#define PrintError(error_message, error) print(error_message ": %s", ErrorToString((error)))
 
 template <typename T>
 static force_inline Result<T> Success(T value) {
@@ -745,7 +751,13 @@ struct Array {
 		Init(arena);
 	}
 
-	inline void Push(Type &&elem) {
+	inline void Push(const Type &&elem) {
+		DebugAssert(arena != null, "Array was not initialized.");
+		Type *new_elem = ArenaPushNoZero(arena, Type);
+		*new_elem = elem;
+		++count;
+	}
+	inline void Push(const Type &elem) {
 		DebugAssert(arena != null, "Array was not initialized.");
 		Type *new_elem = ArenaPushNoZero(arena, Type);
 		*new_elem = elem;

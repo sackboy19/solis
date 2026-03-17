@@ -1,3 +1,4 @@
+// comment!
 import basic
 
 const the_constant: int = 5;
