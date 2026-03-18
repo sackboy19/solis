@@ -2,6 +2,10 @@
 .kdev4/
 *.kdev4
 ideas.sol
+*.kate-swp
+
+# Vim
+*.swp
 
 # Prerequisites
 *.d
