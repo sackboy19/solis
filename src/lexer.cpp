@@ -54,6 +54,12 @@ struct Token {
 
 	U32 line;
 	U32 column;
+
+	constexpr inline bool operator==(const Token& other) const {
+		return kind == other.kind && file_id == other.file_id &&
+			offset == other.offset && length == other.length &&
+			line == other.line && column == other.column;
+	}
 };
 
 struct Lexer {
@@ -85,16 +91,9 @@ struct Lexer {
 		};
 	}
 
-	force_inline String StringFromToken(const Token& token) const {
+	force_inline String GetTokenData(const Token& token) const {
 		return MakeStringEx((char *)((UIntPtr)contents.data + (UIntPtr)token.offset), token.length);
 	}
-
-#ifndef NDEBUG
-	force_inline void PrintToken(const Token& token) const {
-		print("Token{kind=%s, file_id=%hu, offset=%u, length=%u, line=%u, column=%u}, String=\"%.*s\"",
-			TokenKindToString(token.kind), token.file_id, token.offset, token.length, token.line, token.column, FmtStr(StringFromToken(token)));
-	}
-#endif
 
 	// TODO(Danny): LUT array for file_id -> filename
 	force_inline void ReportErrorAtToken(CString message, const Token& token) const {
@@ -108,6 +107,17 @@ struct Lexer {
 		// TODO(Danny): Print the full line string and '^' under it showing where the error occurred.
 		printerr("Error: %s at: %s[line:%u, col:%u]", message, filename, current_line, current_column);
 	}
+
+#ifndef NDEBUG
+	force_inline void PrintToken(const Token& token) const {
+		print("Token{kind=%s, file_id=%hu, offset=%u, length=%u, line=%u, column=%u}",
+			TokenKindToString(token.kind), token.file_id, token.offset, token.length, token.line, token.column);
+	}
+	force_inline void PrintTokenAndData(const Token& token) const {
+		print("Token{kind=%s, file_id=%hu, offset=%u, length=%u, line=%u, column=%u}, Data=\"%.*s\"",
+			TokenKindToString(token.kind), token.file_id, token.offset, token.length, token.line, token.column, FmtStr(GetTokenData(token)));
+	}
+#endif
 
 	force_inline char PeekChar(U32 look_ahead=0) const {
 		return contents[current_pos + look_ahead];

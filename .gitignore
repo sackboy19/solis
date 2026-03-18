@@ -8,6 +8,7 @@ ideas.sol
 
 # Compiled Object files
 solis
+solis_tests
 *.slo
 *.lo
 *.o

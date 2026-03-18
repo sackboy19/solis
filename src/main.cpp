@@ -20,11 +20,11 @@
 int main(int argc, char *argv[]) {
 	Arena *file_arena = ArenaAlloc(GB(4));
 
-	CString test_file = "test.sol";
+	CString file = "test.sol";
 
-	Result result = sol::ReadEntireFile(file_arena, test_file);
+	Result result = sol::ReadEntireFile(file_arena, file);
 	if (!result.success) {
-		PrintError("Could not open file", result.error);
+		printerr("Error: " FG_RESET "Could not open file: " FG_YELLOW "%s" FG_RESET " (%s)", file, ErrorToString(result.error));
 	}
 
 	String contents = result.value;
@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
 	U16 file_id = 0;
 
 	sol::Lexer lexer;
-	lexer.Init(file_arena, contents, test_file, file_id++);
+	lexer.Init(file_arena, contents, file, file_id++);
 	lexer.ScanTokens();
 
 	print("num tokens: %lu", lexer.tokens.count);
 	ForEach(lexer.tokens) {
-		lexer.PrintToken(v);
+		lexer.PrintTokenAndData(v);
 	}
 }

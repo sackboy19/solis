@@ -77,15 +77,16 @@
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x
 
-#define ANSI_RED    "\x1b[31m"
-#define ANSI_GREEN  "\x1b[32m"
-#define ANSI_YELLOW "\x1b[33m"
-#define ANSI_RESET  "\x1b[0m"
+#define FG_RED    "\x1b[31m"
+#define FG_GREEN  "\x1b[32m"
+#define FG_YELLOW "\x1b[33m"
+#define FG_RESET  "\x1b[0m"
 
 // #ifndef NDEBUG
 #define print(fmt, ...)     printf(fmt "\n", ##__VA_ARGS__)
-#define printwarn(fmt, ...) printf(ANSI_YELLOW fmt "\n" ANSI_RESET, ##__VA_ARGS__)
-#define printerr(fmt, ...) fprintf(stderr, ANSI_RED fmt "\n" ANSI_RESET, ##__VA_ARGS__)
+#define printsuccess(fmt, ...) printf(FG_GREEN fmt "\n" FG_RESET, ##__VA_ARGS__)
+#define printwarn(fmt, ...) printf(FG_YELLOW fmt "\n" FG_RESET, ##__VA_ARGS__)
+#define printerr(fmt, ...) fprintf(stderr, FG_RED fmt "\n" FG_RESET, ##__VA_ARGS__)
 #if OS_WINDOWS
 #define DebugAssert(c, msg)       \
 	if (!(c)) {                      \
@@ -94,7 +95,7 @@
 #else
 #define DebugAssert(c, msg)       \
 	if (!(c)) {                      \
-		print("Assertion failed [" __FILE__ ":" STRINGIZE(__LINE__) "] \"" msg "\""); \
+		printerr("Assertion failed [" __FILE__ ":" STRINGIZE(__LINE__) "] \"" msg "\""); \
 		__builtin_trap(); \
 	}
 #endif
@@ -175,7 +176,6 @@ struct String {
 	constexpr force_inline String(const char (&data)[N]) : data((char *)data), count(N-1) {}
 	constexpr force_inline String(char *data, U64 count) : data(data), count(count) {}
 	constexpr force_inline char operator[](U64 idx) const noexcept { return data[idx]; };
-	// TODO(Danny): == operator
 	constexpr inline bool operator==(const String& other) const {
 		if (count != other.count) {
 			return false;
@@ -203,9 +203,13 @@ template <typename T>
 struct View {
 	T  *data;
 	U64 count;
-	constexpr force_inline T& operator[](U64 idx) const noexcept { return data[idx]; };
+	constexpr force_inline T& operator[](U64 idx) noexcept { return data[idx]; };
+	T *begin() { return data; }
+	T *end()   { return data + count; }
+	const T *begin() const { return data; }
+	const T *end()   const { return data + count; }
 };
-#define ViewArray(ptr)     View{(ptr), (sizeof(ptr))}
+#define ViewArray(ptr)     View{(ptr), (ArrayLength(ptr))}
 #define ViewEx(ptr, count) View{(ptr), (count)}
 
 inline String StringFmt(View<char> buf, CString format, ...) {
@@ -243,10 +247,9 @@ struct Result {
 // You should only ever pass a variable to a Result here. Not a function call.
 #define Check(result_var, error_message) { \
 	if (!(result_var).success) { \
-		print(error_message ": %s", ErrorToString((result_var).error); \
+		printerr(error_message ": %s", ErrorToString((result_var).error); \
 	} \
 }
-#define PrintError(error_message, error) print(error_message ": %s", ErrorToString((error)))
 
 template <typename T>
 static force_inline Result<T> Success(T value) {
