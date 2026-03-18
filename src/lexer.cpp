@@ -37,7 +37,7 @@ static CString TokenKindToString(TokenKind kind) {
 		case TokenKind::WHITESPACE:
 			return "TokenKind::WHITESPACE";
 		case TokenKind::END_OF_FILE:
-			return "TokenKind::EOF";
+			return "TokenKind::END_OF_FILE";
 		default: {
 			return "TokenKind::UNKNOWN";
 		}
@@ -95,16 +95,17 @@ struct Lexer {
 		return MakeStringEx((char *)((UIntPtr)contents.data + (UIntPtr)token.offset), token.length);
 	}
 
-	// TODO(Danny): LUT array for file_id -> filename
+	// TODO(Dan): LUT array for file_id -> filename
+
 	force_inline void ReportErrorAtToken(CString message, const Token& token) const {
-		// TODO(Danny): Print the full line string and '^' under it showing where the error occurred.
+		// TODO(Dan): Print the full line string and '^' under it showing where the error occurred.
 		printerr("Error: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
 	}
 	force_inline void ReportWarningAtToken(CString message, const Token& token) const {
 		printwarn("Warning: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
 	}
 	force_inline void ReportError(CString message) const {
-		// TODO(Danny): Print the full line string and '^' under it showing where the error occurred.
+		// TODO(Dan): Print the full line string and '^' under it showing where the error occurred.
 		printerr("Error: %s at: %s[line:%u, col:%u]", message, filename, current_line, current_column);
 	}
 

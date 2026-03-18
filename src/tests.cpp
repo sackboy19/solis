@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
 	U32 test_count = 0;
 	U32 fail_count = 0;
 
+	// TODO(Dan): Test all lexer/parser errors too.
 	// Lexer:
 	////////////////////////////////////////////////
 	// 01_whitespace_and_comments
@@ -28,8 +29,18 @@ int main(int argc, char *argv[]) {
 		++test_count;
 		ArenaCheckpoint(arena);
 		sol::Token expected[] = {
-			sol::Token{.kind=sol::TokenKind::WHITESPACE},
-			sol::Token{.kind=sol::TokenKind::WHITESPACE},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,  .offset=0,   .length=3,  .line=1,  .column=1},
+			sol::Token{.kind=sol::TokenKind::COMMENT,     .offset=3,   .length=15, .line=2,  .column=3},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,  .offset=18,  .length=3,  .line=2,  .column=18},
+			sol::Token{.kind=sol::TokenKind::COMMENT,     .offset=21,  .length=13, .line=4,  .column=2},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,  .offset=34,  .length=2,  .line=4,  .column=15},
+			sol::Token{.kind=sol::TokenKind::COMMENT,     .offset=36,  .length=20, .line=6,  .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,  .offset=56,  .length=2,  .line=8,  .column=3},
+			sol::Token{.kind=sol::TokenKind::COMMENT,     .offset=58,  .length=32, .line=10, .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,  .offset=90,  .length=1,  .line=10, .column=33},
+			sol::Token{.kind=sol::TokenKind::COMMENT,     .offset=91,  .length=19, .line=11, .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,  .offset=110, .length=1,  .line=13, .column=3},
+			sol::Token{.kind=sol::TokenKind::END_OF_FILE, .offset=111, .length=0,  .line=14, .column=1},
 		};
 		if (!LexerTestFile(arena, "tests/lexer/01_whitespace_and_comments.sol", ViewArray(expected))) {
 			++fail_count;

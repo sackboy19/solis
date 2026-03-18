@@ -20,7 +20,8 @@
 int main(int argc, char *argv[]) {
 	Arena *file_arena = ArenaAlloc(GB(4));
 
-	CString file = "test.sol";
+	// CString file = "test.sol";
+	CString file = "tests/lexer/01_whitespace_and_comments.sol";
 
 	Result result = sol::ReadEntireFile(file_arena, file);
 	if (!result.success) {

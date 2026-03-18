@@ -130,7 +130,7 @@ static void try_map_grow(PtrMap<K, V> *h) {
 	}
 }
 
-// TODO(Danny): Convert to HashMap with methods. Why are we doing this Gingerbill. You're pollutting the namespace,
+// TODO(Dan): Convert to HashMap with methods. Why are we doing this Gingerbill. You're pollutting the namespace,
 // and also making it more typing, and also now you have to worry about passing in the pointer every time.
 template <typename K, typename V>
 static void map_reserve(PtrMap<K, V> *h, ISize cap) {
@@ -141,7 +141,7 @@ static void map_reserve(PtrMap<K, V> *h, ISize cap) {
 	}
 	// Danny: Note that this gets called for creating AND growing!!
 
-	// TODO(Danny): Do our array Init() procedure.
+	// TODO(Dan): Do our array Init() procedure.
 	// I believe we don't need capacity since we're using arenas.
 	// Actually we probably do as we need the load-factor and stuff.
 	// We probably do need capcacity, and our arena supports it, you just allocate more.
