@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 	U16 file_id = 0;
 
 	sol::Lexer lexer;
-	lexer.Init(file_arena, contents, file_id++);
+	lexer.Init(file_arena, contents, test_file, file_id++);
 	lexer.ScanTokens();
 
 	print("num tokens: %lu", lexer.tokens.count);

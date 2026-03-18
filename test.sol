@@ -1,4 +1,10 @@
-// comment!
+// comment! /*
+/* this is a block
+ * comment!
+ /*
+  Nesting oo
+  */
+ * */
 import basic
 
 const the_constant: int = 5;

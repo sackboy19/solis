@@ -62,13 +62,15 @@ struct Lexer {
 	U32 current_column;
 	String contents;
 	Array<Token> tokens;
+	CString filename;
 	U16 file_id;
 
-	force_inline void Init(Arena *arena, String contents, U16 file_id) {
+	force_inline void Init(Arena *arena, String contents, CString filename, U16 file_id) {
 		self->current_pos = 0;
 		self->current_line = 1;
 		self->current_column = 1;
 		self->contents = contents;
+		self->filename = filename;
 		self->file_id = file_id;
 		self->tokens.Init(arena, false);
 	}
@@ -97,11 +99,14 @@ struct Lexer {
 	// TODO(Danny): LUT array for file_id -> filename
 	force_inline void ReportErrorAtToken(CString message, const Token& token) const {
 		// TODO(Danny): Print the full line string and '^' under it showing where the error occurred.
-		printerr("Error: %s at: %s[line:%u, col:%u]", message, "file.sol", token.line, token.column);
+		printerr("Error: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
+	}
+	force_inline void ReportWarningAtToken(CString message, const Token& token) const {
+		printwarn("Warning: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
 	}
 	force_inline void ReportError(CString message) const {
 		// TODO(Danny): Print the full line string and '^' under it showing where the error occurred.
-		printerr("Error: %s at: %s[line:%u, col:%u]", message, "file.sol", current_line, current_column);
+		printerr("Error: %s at: %s[line:%u, col:%u]", message, filename, current_line, current_column);
 	}
 
 	force_inline char PeekChar(U32 look_ahead=0) const {
@@ -139,6 +144,7 @@ struct Lexer {
 				}
 			}
 		}
+
 		exit:
 			token.length = current_pos - token.offset;
 			return token;
@@ -146,8 +152,7 @@ struct Lexer {
 
 	Token ScanLineComment() {
 		Token token = MakeToken(TokenKind::COMMENT);
-		SkipChar(); // Skip first  '/'
-		SkipChar(); // Skip second '/'
+		SkipChar(); SkipChar(); // Skip '//'
 
 		for (;;) {
 			char next = PeekChar();
@@ -156,6 +161,7 @@ struct Lexer {
 			}
 			SkipChar();
 		}
+
 		exit:
 			token.length = current_pos - token.offset;
 			return token;
@@ -163,11 +169,38 @@ struct Lexer {
 
 	Token ScanBlockComment() {
 		Token token = MakeToken(TokenKind::COMMENT);
-		SkipChar(); // Skip '/'
-		// TODO(Danny): Count how many extra "/*" there are to allow for nesting
-		ReportErrorAtToken("Expected '*/' to close block comment", token);
-		// TODO(Danny): For recoverable errors just ignore it fix it if you can and keep going.
-		return token;
+		SkipChar(); SkipChar(); // Skip '/*'
+
+		S32 open_count = 1;
+		for (;;) {
+			char next = PeekChar();
+			if (next == '\0') {
+				goto exit;
+			}
+			if (next == '*') {
+				if (PeekChar(1) == '/') {
+					if (--open_count <= 0) {
+						SkipChar(); SkipChar(); // Skip '*/'
+						goto exit;
+					}
+				}
+			}
+			else if (next == '/') {
+				if (PeekChar(1) == '*') {
+					SkipChar(); SkipChar(); // Skip '/*'
+					++open_count;
+					continue;
+				}
+			}
+			SkipChar();
+		}
+
+		exit:
+			if (open_count > 0) {
+				ReportWarningAtToken("Expected '*/' to close block comment", token);
+			}
+			token.length = current_pos - token.offset;
+			return token;
 	}
 
 	void ScanIdentifier() {
