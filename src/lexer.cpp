@@ -62,23 +62,36 @@ struct Token {
 	}
 };
 
+// TODO(Dan): Larray for file_id -> filename
 struct Lexer {
 	U32 current_pos;
 	U32 current_line;
 	U32 current_column;
+	U32 error_count;
+	U32 warning_count;
 	String contents;
 	Array<Token> tokens;
 	CString filename;
 	U16 file_id;
 
+#ifdef SOL_TESTS
+	// Per file
+	char *error_buffers;   // ERR_WARN_BUFFER_CHARS * ERR_WARN_BUFFER_COUNT
+	char *warning_buffers; // ERR_WARN_BUFFER_CHARS * ERR_WARN_BUFFER_COUNT
+	String errors[ERR_WARN_BUFFER_COUNT];
+	String warnings[ERR_WARN_BUFFER_COUNT];
+#endif
+
 	force_inline void Init(Arena *arena, String contents, CString filename, U16 file_id) {
 		self->current_pos = 0;
 		self->current_line = 1;
 		self->current_column = 1;
+		self->error_count = 0;
+		self->warning_count = 0;
 		self->contents = contents;
 		self->filename = filename;
 		self->file_id = file_id;
-		self->tokens.Init(arena, false);
+		self->tokens.Init(arena);
 	}
 
 	force_inline Token MakeToken(TokenKind kind) const {
@@ -95,18 +108,37 @@ struct Lexer {
 		return MakeStringEx((char *)((UIntPtr)contents.data + (UIntPtr)token.offset), token.length);
 	}
 
-	// TODO(Dan): LUT array for file_id -> filename
+	#ifdef SOL_TESTS
+	force_inline View<char> MakeErrorBufferView(char *buffers, U32 index) {
+		return ViewEx(&buffers[index*ERR_WARN_BUFFER_CHARS], ERR_WARN_BUFFER_CHARS);
+	}
+	#endif
 
-	force_inline void ReportErrorAtToken(CString message, const Token& token) const {
+	force_inline void ReportErrorAtToken(CString message, const Token& token) {
 		// TODO(Dan): Print the full line string and '^' under it showing where the error occurred.
+		#ifdef SOL_TESTS
+		errors[error_count] = StringFmt(MakeErrorBufferView(error_buffers, error_count), "Error: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
+		#else
 		printerr("Error: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
+		#endif
+		++error_count;
 	}
-	force_inline void ReportWarningAtToken(CString message, const Token& token) const {
+	force_inline void ReportWarningAtToken(CString message, const Token& token) {
+		#ifdef SOL_TESTS
+		warnings[warning_count] = StringFmt(MakeErrorBufferView(warning_buffers, warning_count), "Warning: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
+		#else
 		printwarn("Warning: %s at: %s[line:%u, col:%u]", message, filename, token.line, token.column);
+		#endif
+		++warning_count;
 	}
-	force_inline void ReportError(CString message) const {
+	force_inline void ReportError(CString message) {
 		// TODO(Dan): Print the full line string and '^' under it showing where the error occurred.
+		#ifdef SOL_TESTS
+		errors[error_count] = StringFmt(MakeErrorBufferView(error_buffers, error_count), "Error: %s at: %s[line:%u, col:%u]", message, filename, current_line, current_column);
+		#else
 		printerr("Error: %s at: %s[line:%u, col:%u]", message, filename, current_line, current_column);
+		#endif
+		++error_count;
 	}
 
 #ifndef NDEBUG

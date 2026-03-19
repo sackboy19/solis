@@ -1,0 +1,2 @@
+/* Unterminated block comment!
+ *

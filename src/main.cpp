@@ -21,11 +21,13 @@ int main(int argc, char *argv[]) {
 	Arena *file_arena = ArenaAlloc(GB(4));
 
 	// CString file = "test.sol";
-	CString file = "tests/lexer/01_whitespace_and_comments.sol";
+	// CString file = "tests/lexer/01-whitespace-and-comments.sol";
+	CString file = "tests/lexer/02-block-comment-warning.sol";
 
 	Result result = sol::ReadEntireFile(file_arena, file);
 	if (!result.success) {
 		printerr("Error: " FG_RESET "Could not open file: " FG_YELLOW "%s" FG_RESET " (%s)", file, ErrorToString(result.error));
+		return 1;
 	}
 
 	String contents = result.value;

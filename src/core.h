@@ -83,8 +83,10 @@
 #define FG_RESET  "\x1b[0m"
 
 // #ifndef NDEBUG
-#define print(fmt, ...)     printf(fmt "\n", ##__VA_ARGS__)
-#define printsuccess(fmt, ...) printf(FG_GREEN fmt "\n" FG_RESET, ##__VA_ARGS__)
+#define print(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
+#define printex(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#define printred(fmt, ...) printf(FG_RED fmt "\n" FG_RESET, ##__VA_ARGS__)
+#define printgreen(fmt, ...) printf(FG_GREEN fmt "\n" FG_RESET, ##__VA_ARGS__)
 #define printwarn(fmt, ...) printf(FG_YELLOW fmt "\n" FG_RESET, ##__VA_ARGS__)
 #define printerr(fmt, ...) fprintf(stderr, FG_RED fmt "\n" FG_RESET, ##__VA_ARGS__)
 #if OS_WINDOWS
@@ -211,14 +213,6 @@ struct View {
 };
 #define ViewArray(ptr)     View{(ptr), (ArrayLength(ptr))}
 #define ViewEx(ptr, count) View{(ptr), (count)}
-
-inline String StringFmt(View<char> buf, CString format, ...) {
-	va_list args;
-	va_start(args, format);
-	U64 written = vsnprintf(buf.data, buf.count, format, args);
-	va_end(args);
-	return MakeStringEx(buf.data, written);
-}
 
 // Errors
 enum class Error {
@@ -737,7 +731,7 @@ struct Array {
 	Type  *data;
 	U64    count = 0;
 
-	inline void Init(Arena *arena, bool checkpoint=true) {
+	inline void Init(Arena *arena, bool checkpoint=false) {
 		// Align the arena to Type
 		Type *first = ArenaPushNoZero(arena, Type);
 		arena->used -= sizeof(Type);
@@ -767,7 +761,7 @@ struct Array {
 		++count;
 	}
 
-	inline void Clear(bool checkpoint=true) {
+	inline void Clear(bool checkpoint=false) {
 		if (checkpoint) {
 			ArenaClearCheckpoint(arena);
 		}
@@ -785,6 +779,24 @@ struct Array {
 	const Type *end()   const { return data + count; }
 };
 
+/* #endregion */
+
+/* #Region String formatting */
+inline String StringFmt(View<char> buf, CString format, ...) {
+	va_list args;
+	va_start(args, format);
+	U64 written = vsnprintf(buf.data, buf.count, format, args);
+	va_end(args);
+	return MakeStringEx(buf.data, written);
+}
+inline String StringFmt(Arena *arena, U32 max_chars, CString format, ...) {
+	va_list args;
+	va_start(args, format);
+	char *buf = PushArray(arena, char, max_chars);
+	U64 written = vsnprintf(buf, max_chars, format, args);
+	va_end(args);
+	return MakeStringEx(buf, written);
+}
 /* #endregion */
 
 /* #Region Hash Functions */
