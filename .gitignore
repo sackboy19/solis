@@ -2,6 +2,7 @@
 .kdev4/
 *.kdev4
 ideas.sol
+test2.sol
 *.kate-swp
 
 # Vim
