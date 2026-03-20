@@ -24,14 +24,14 @@ main: (args: []string) {
 	x2: i64
 	x3: u64
 
-	val: Value = .FIRST print(val)
+	val: Value = .FIRST print(val) // same line statements
 
 	c: char = 'a'
 
 	arr: []int = {1, 2, 3}
 
 	for x in arr {
-		print(x)
+		print(x); // semi-colons are optional
 	}
 
 	// string interpolation
