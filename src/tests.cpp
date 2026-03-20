@@ -76,6 +76,49 @@ int main(int argc, char *argv[]) {
 		}
 		ArenaDecommitCheckpoint(arena);
 	}
+	// 03-nested-block-comment-warning
+	{
+		++test_count;
+		ArenaCheckpoint(arena);
+		sol::Token expected_tokens[] = {
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,  .offset=0,  .length=1,  .line=1, .column=1},
+			sol::Token{.kind=sol::TokenKind::COMMENT,     .offset=1,  .length=48, .line=2, .column=1},
+			sol::Token{.kind=sol::TokenKind::END_OF_FILE, .offset=49, .length=0,  .line=5, .column=7},
+		};
+		String expected_errors[] = {};
+		String expected_warnings[] = {MakeString("Warning: Expected '*/' to close block comment at: tests/lexer/03-nested-block-comment-warning.sol[line:2, col:1]")};
+		if (!LexerTestFile(arena, "tests/lexer/03-nested-block-comment-warning.sol", ViewArray(expected_tokens), ViewArray(expected_errors), ViewArray(expected_warnings))) {
+			++fail_count;
+		}
+		ArenaDecommitCheckpoint(arena);
+	}
+	// 04-keywords-and-identifiers
+	{
+		++test_count;
+		ArenaCheckpoint(arena);
+		sol::Token expected_tokens[] = {
+			sol::Token{.kind=sol::TokenKind::KEYWORD_IMPORT, .offset=0,  .length=6,  .line=1, .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,     .offset=6,  .length=1,  .line=1, .column=7},
+			sol::Token{.kind=sol::TokenKind::IDENTIFIER,     .offset=7,  .length=5,  .line=1, .column=8},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,     .offset=12, .length=2,  .line=1, .column=13},
+			sol::Token{.kind=sol::TokenKind::COMMENT,        .offset=14, .length=26, .line=3, .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,     .offset=40, .length=1,  .line=3, .column=27},
+			sol::Token{.kind=sol::TokenKind::IDENTIFIER,     .offset=41, .length=12, .line=4, .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,     .offset=53, .length=1,  .line=4, .column=13},
+			sol::Token{.kind=sol::TokenKind::IDENTIFIER,     .offset=54, .length=5,  .line=5, .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,     .offset=59, .length=1,  .line=5, .column=3},
+			sol::Token{.kind=sol::TokenKind::IDENTIFIER,     .offset=60, .length=14, .line=6, .column=1},
+			sol::Token{.kind=sol::TokenKind::WHITESPACE,     .offset=74, .length=1,  .line=6, .column=5},
+			sol::Token{.kind=sol::TokenKind::IDENTIFIER,     .offset=75, .length=11, .line=7, .column=1},
+			sol::Token{.kind=sol::TokenKind::END_OF_FILE,    .offset=86, .length=0,  .line=7, .column=9},
+		};
+		String expected_errors[] = {};
+		String expected_warnings[] = {};
+		if (!LexerTestFile(arena, "tests/lexer/04-keywords-and-identifiers.sol", ViewArray(expected_tokens), ViewArray(expected_errors), ViewArray(expected_warnings))) {
+			++fail_count;
+		}
+		ArenaDecommitCheckpoint(arena);
+	}
 	////////////////////////////////////////////////
 
 
@@ -105,7 +148,7 @@ static bool CompareViews(View<T> expected, View<T> found) {
 }
 
 static bool LexerTestFile(Arena *arena, CString file, View<sol::Token> expected_tokens, View<String> expected_errors, View<String> expected_warnings) {
-	printex("Running test: %s ... ", file);
+	printex("Running test: %-47s | ", file);
 	// NOTE(Dan): After this we're not using printerr because if output goes to stderr, it's not synced with stdout, and might print beforehand.
 
 	Result result = sol::ReadEntireFile(arena, file);

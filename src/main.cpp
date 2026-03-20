@@ -20,9 +20,10 @@
 int main(int argc, char *argv[]) {
 	Arena *file_arena = ArenaAlloc(GB(4));
 
-	// CString file = "test.sol";
+	// CString file = "test2.sol";
 	// CString file = "tests/lexer/01-whitespace-and-comments.sol";
-	CString file = "tests/lexer/02-block-comment-warning.sol";
+	// CString file = "tests/lexer/02-block-comment-warning.sol";
+	CString file = "tests/lexer/04-keywords-and-identifiers.sol";
 
 	Result result = sol::ReadEntireFile(file_arena, file);
 	if (!result.success) {

@@ -27,6 +27,8 @@ enum class TokenKind : U16 {
 
 	KEYWORD_FALSE,
 	KEYWORD_TRUE,
+
+	KEYWORD_IMPORT,
 	END_OF_FILE,
 };
 #ifndef NDEBUG
@@ -36,6 +38,10 @@ static CString TokenKindToString(TokenKind kind) {
 			return "TokenKind::COMMENT";
 		case TokenKind::WHITESPACE:
 			return "TokenKind::WHITESPACE";
+		case TokenKind::IDENTIFIER:
+			return "TokenKind::IDENTIFER";
+		case TokenKind::KEYWORD_IMPORT:
+			return "TokenKind::KEYWORD_IMPORT";
 		case TokenKind::END_OF_FILE:
 			return "TokenKind::END_OF_FILE";
 		default: {
@@ -82,6 +88,19 @@ struct Lexer {
 	String warnings[ERR_WARN_BUFFER_COUNT];
 #endif
 
+	// Begin Helpers
+	#ifdef SOL_TESTS
+	static force_inline View<char> MakeErrorBufferView(char *buffers, U32 index) {
+		return ViewEx(&buffers[index*ERR_WARN_BUFFER_CHARS], ERR_WARN_BUFFER_CHARS);
+	}
+	#endif
+	static force_inline U32 UTF8Length(U8 c) {
+		return ((c & 0xE0) == 0xC0) + // 2-byte
+		((c & 0xF0) == 0xE0) * 3 +    // 3-byte
+		((c & 0xF8) == 0xF0) * 4;     // 4-byte
+	}
+	// End Helpers
+
 	force_inline void Init(Arena *arena, String contents, CString filename, U16 file_id) {
 		self->current_pos = 0;
 		self->current_line = 1;
@@ -108,11 +127,14 @@ struct Lexer {
 		return MakeStringEx((char *)((UIntPtr)contents.data + (UIntPtr)token.offset), token.length);
 	}
 
-	#ifdef SOL_TESTS
-	force_inline View<char> MakeErrorBufferView(char *buffers, U32 index) {
-		return ViewEx(&buffers[index*ERR_WARN_BUFFER_CHARS], ERR_WARN_BUFFER_CHARS);
+	TokenKind GetIdentifierKind(Token identifier) {
+		String data = GetTokenData(identifier);
+		TokenKind kind = TokenKind::IDENTIFIER;
+		if (data == "import") {
+			kind = TokenKind::KEYWORD_IMPORT;
+		}
+		return kind;
 	}
-	#endif
 
 	force_inline void ReportErrorAtToken(CString message, const Token& token) {
 		// TODO(Dan): Print the full line string and '^' under it showing where the error occurred.
@@ -246,8 +268,36 @@ struct Lexer {
 			return token;
 	}
 
-	void ScanIdentifier() {
-
+	Token ScanIdentifier() {
+		Token token = MakeToken(TokenKind::IDENTIFIER);
+		char next = PeekChar();
+		// Unicode char
+		if (next >= 128) [[unlikely]] {
+			current_pos += UTF8Length(next);
+			next = PeekChar();
+			++current_column;
+		}
+		if (IsIdent(next)) {
+			SkipChar();
+		}
+		for (;;) {
+			next = PeekChar();
+			// Unicode char
+			if (next >= 128) [[unlikely]] {
+				current_pos += UTF8Length(next);
+				++current_column;
+				continue;
+			}
+			IsIdent(next);
+			IsDigit(next);
+			if (IsIdent(next) || IsDigit(next)) {
+				SkipChar();
+				continue;
+			}
+			break;
+		}
+		token.length = current_pos - token.offset;
+		return token;
 	}
 
 	void ScanTokens() {
@@ -288,6 +338,14 @@ struct Lexer {
 				}
 
 				default: {
+					// Identifiers
+					if ((next >= 128) || IsIdent(next)) {
+						Token identifier = ScanIdentifier();
+						identifier.kind = GetIdentifierKind(identifier); // Check if it's a keyword
+						tokens.Push(identifier);
+						break;
+					}
+
 					print("Skipping unknown char: '%c'", next);
 					SkipChar();
 					break;

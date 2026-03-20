@@ -77,6 +77,10 @@
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x
 
+#define IsAlpha(c) (((U32)((c) | 32) - 'a') <= 25)
+#define IsDigit(c) ((U32)((c) - '0') <= 9)
+#define IsIdent(c) (IsAlpha((c)) || ((c) == '_'))
+
 #define FG_RED    "\x1b[31m"
 #define FG_GREEN  "\x1b[32m"
 #define FG_YELLOW "\x1b[33m"
