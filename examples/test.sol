@@ -17,7 +17,7 @@ enum Value {
 	THIRD,
 }
 
-main: (args: []string) {
+main: (args: {string}) {
 	x: int = -1
 	y: uint = 1
 
@@ -28,7 +28,7 @@ main: (args: []string) {
 
 	c: char = 'a'
 
-	arr: []int = {1, 2, 3}
+	arr: {int} = {1, 2, 3}
 
 	for x in arr {
 		print(x); // semi-colons are optional
@@ -41,7 +41,7 @@ main: (args: []string) {
 	print($"One plus two is: {1+2}")
 
 	// dynamic arrays
-	arr2: [..]int = {}
+	arr2: {int:*} = {}
 	arr2.push(5)
 
 	// pointers and local scope functions

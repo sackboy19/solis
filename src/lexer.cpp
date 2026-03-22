@@ -8,6 +8,12 @@
 
 #include "core.h"
 
+#ifdef SOL_TESTS
+// To save any generated errors and warnings for tests
+#define ERR_WARN_BUFFER_CHARS 512
+#define ERR_WARN_BUFFER_COUNT 512
+#endif
+
 namespace sol {
 
 enum class TokenKind : U16 {
@@ -20,15 +26,27 @@ enum class TokenKind : U16 {
 
 	// 32-127 Reserved for ASCII '(', ')', +', '-', etc.
 
-	KEYWORD_B32 = 128,
-	KEYWORD_B8,
-	KEYWORD_BOOL,
-	KEYWORD_CONST,
+	KEYWORD_CONST = 128,
 
 	KEYWORD_FALSE,
 	KEYWORD_TRUE,
 
 	KEYWORD_IMPORT,
+
+	KEYWORD_B32,
+	KEYWORD_B8,
+	KEYWORD_BOOL,
+
+	KEYWORD_INT,
+	KEYWORD_I32,
+	KEYWORD_I64,
+	KEYWORD_UINT,
+	KEYWORD_U32,
+	KEYWORD_U64,
+
+	KEYWORD_CSTRING,
+	KEYWORD_STRING,
+
 	END_OF_FILE,
 };
 #ifndef NDEBUG
@@ -68,7 +86,7 @@ struct Token {
 	}
 };
 
-// TODO(Dan): Larray for file_id -> filename
+// TODO(Dan): LUT array for file_id -> filename
 struct Lexer {
 	U32 current_pos;
 	U32 current_line;

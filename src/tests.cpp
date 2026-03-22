@@ -12,9 +12,6 @@
 #include "platform_linux.cpp"
 #endif
 
-#define ERR_WARN_BUFFER_CHARS 512
-#define ERR_WARN_BUFFER_COUNT 512
-
 #define SOL_TESTS
 #include "lexer.cpp"
 

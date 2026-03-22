@@ -1,8 +1,8 @@
 # KDevelop
 .kdev4/
 *.kdev4
-ideas.sol
-test2.sol
+examples/ideas.sol
+examples/test2.sol
 *.kate-swp
 
 # Vim
