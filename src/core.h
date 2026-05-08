@@ -26,7 +26,7 @@
 #if defined(_WIN32) || defined(_WIN64)
 	#define OS_WINDOWS 1
 #elif defined(__APPLE__)
-	#define OS_MACOS 1
+	#define OS_DARWIN 1
 #elif defined(__linux__)
 	#define OS_LINUX 1
 #endif
@@ -565,6 +565,29 @@ inline void OSDecommit(void *ptr, U64 size) {
 inline void OSRelease(void *ptr, U64 size) {
 	munmap(ptr, (USize)size);
 }
+#elif OS_DARWIN
+// macOS specific
+#include <sys/mman.h>
+inline void* OSReserve(U64 size) {
+	void *p = mmap(null, (USize)size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	return (p == MAP_FAILED) ? null : p;
+}
+
+inline void OSCommit(void *ptr, U64 size) {
+	mprotect(ptr, (USize)size, PROT_READ | PROT_WRITE);
+}
+
+inline void OSDecommit(void *ptr, U64 size) {
+	// Make inaccessible again.
+	mprotect(ptr, (USize)size, PROT_NONE);
+
+	// Tell kernel it can drop the physical pages (so future faults come back zeroed).
+	madvise(ptr, (USize)size, MADV_DONTNEED);
+}
+
+inline void OSRelease(void *ptr, U64 size) {
+	munmap(ptr, (USize)size);
+}
 #endif
 
 static inline Vec4 RGBAToHSVA(Vec4 c) {
@@ -668,7 +691,7 @@ inline void ArenaDecommitCheckpoint(Arena *arena) {
 	}
 }
 
-#if OS_LINUX
+#if OS_LINUX || OS_DARWIN
 #include <unistd.h>
 #endif
 // Arena procedures
@@ -682,6 +705,8 @@ inline Arena *ArenaAlloc(U64 reserve_amount=ARENA_RESERVE_SIZE) {
 	U64 page_size = (U64)si.dwPageSize;
 #elif OS_LINUX
 	U64 page_size = (U64)sysconf(_SC_PAGESIZE);
+#elif OS_DARWIN
+	U64 page_size = (U64)getpagesize();
 #endif
 	DebugAssert(ARENA_COMMIT_SIZE % page_size == 0, "Commit size must be page aligned.");
 

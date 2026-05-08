@@ -28,6 +28,7 @@ solis_tests
 
 # Debugger Files
 *.pdb
+*.dSYM
 
 # Compiled Dynamic libraries
 *.so

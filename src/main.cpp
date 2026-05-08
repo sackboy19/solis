@@ -13,6 +13,8 @@
 
 #if OS_LINUX
 #include "platform_linux.cpp"
+#elif OS_DARWIN
+#include "platform_darwin.cpp"
 #endif
 
 #include "lexer.cpp"

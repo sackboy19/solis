@@ -57,7 +57,7 @@ static CString TokenKindToString(TokenKind kind) {
 		case TokenKind::WHITESPACE:
 			return "TokenKind::WHITESPACE";
 		case TokenKind::IDENTIFIER:
-			return "TokenKind::IDENTIFER";
+			return "TokenKind::IDENTIFIER";
 		case TokenKind::KEYWORD_IMPORT:
 			return "TokenKind::KEYWORD_IMPORT";
 		case TokenKind::END_OF_FILE:
